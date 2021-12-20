@@ -1,4 +1,15 @@
 <template>
+	<base-dialog v-if="invalidInput" title="Invalid Input" @close="closeDialog">
+		<template #default>
+			<p>Unfortunately, at least one input value is invalid.</p>
+			<p>
+				Chech all inputs and make sure you enter at least a few characters..
+			</p>
+		</template>
+		<template #actions>
+			<base-button @click="closeDialog">Okay</base-button>
+		</template>
+	</base-dialog>
 	<base-card>
 		<form @submit.prevent="handleSubmit">
 			<div class="form-control">
@@ -27,6 +38,11 @@
 export default {
 	inject: ['addResource'],
 	emits: ['resource-added'],
+	data() {
+		return {
+			invalidInput: false,
+		};
+	},
 	methods: {
 		handleSubmit() {
 			const title = this.$refs.titleInput.value;
@@ -34,12 +50,23 @@ export default {
 			const link = this.$refs.linkInput.value;
 
 			// Handle possible errors ...
-
+			if (
+				title.trim() === '' ||
+				description.trim() === '' ||
+				link.trim() === ''
+			) {
+				this.invalidInput = true;
+				return;
+			}
 			//Add Resource
 			this.addResource(title, description, link);
 
 			// Switch to resources tab
 			this.$emit('resource-added');
+		},
+
+		closeDialog() {
+			this.invalidInput = false;
 		},
 	},
 };
